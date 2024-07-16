@@ -1,11 +1,8 @@
 const db = require("../db/connection");
 
 exports.selectTopics = () => {
-	return db.query("SELECT * FROM topics;").then((result) => {
-		if (result.rows.length === 0) {
-			return Promise.reject({ status: 404, message: "No topics found" });
-		}
-		return result.rows;
+	return db.query("SELECT * FROM topics;").then(({ rows }) => {
+		return rows;
 	});
 };
 
@@ -52,11 +49,22 @@ exports.selectCommentsByArticleId = (articleId) => {
 			}
 			return db.query(
 				`SELECT comment_id, votes, created_at, author, body, article_id
-		   FROM comments
-		   WHERE article_id = $1
-		   ORDER BY created_at DESC`,
+                FROM comments
+                WHERE article_id = $1
+                ORDER BY created_at DESC`,
 				[articleId]
 			);
 		})
 		.then(({ rows }) => rows);
+};
+
+exports.insertTeam = ({ team_name, formation_year }) => {
+	return db
+		.query(
+			"INSERT INTO teams (team_name, formation_year) VALUES ($1, $2) RETURNING *;",
+			[team_name, formation_year]
+		)
+		.then((result) => {
+			return result.rows[0];
+		});
 };
