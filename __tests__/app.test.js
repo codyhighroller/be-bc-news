@@ -29,15 +29,13 @@ describe("/api/topics", () => {
 });
 
 describe("/api/", () => {
-	describe("GET /api", () => {
-		it("responds with a json detailing all available endpoints", () => {
-			return request(app)
-				.get("/api")
-				.expect(200)
-				.then(({ body }) => {
-					expect(body.endpoints).toEqual(endpoints);
-				});
-		});
+	it("responds with a json detailing all available endpoints", () => {
+		return request(app)
+			.get("/api")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.endpoints).toEqual(endpoints);
+			});
 	});
 });
 
@@ -83,7 +81,26 @@ describe("/api/articles/:article_id", () => {
 });
 
 describe("/api/articles", () => {
-	test("GET:200 sends an array of all articles", () => {
+	test("GET:200 articles have the correct properties and data types respectively", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles[0]).toEqual(
+					expect.objectContaining({
+						title: expect.any(String),
+						topic: expect.any(String),
+						author: expect.any(String),
+						article_id: expect.any(Number),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					})
+				);
+			});
+	});
+	test("GET:200 sends an array of all articles with the correct properties", () => {
 		return request(app)
 			.get("/api/articles")
 			.expect(200)
@@ -116,30 +133,10 @@ describe("/api/articles", () => {
 				});
 			});
 	});
-
-	test("GET:200 articles have the correct properties and data types", () => {
-		return request(app)
-			.get("/api/articles")
-			.expect(200)
-			.then(({ body }) => {
-				expect(body.articles[0]).toEqual(
-					expect.objectContaining({
-						title: expect.any(String),
-						topic: expect.any(String),
-						author: expect.any(String),
-						article_id: expect.any(Number),
-						created_at: expect.any(String),
-						votes: expect.any(Number),
-						article_img_url: expect.any(String),
-						comment_count: expect.any(Number),
-					})
-				);
-			});
-	});
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-	test("200: responds with an array of comments for the given article_id", () => {
+	test("200: responds with an array of comments for the given article_id with the correct properties", () => {
 		return request(app)
 			.get("/api/articles/1/comments")
 			.expect(200)
