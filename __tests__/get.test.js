@@ -46,18 +46,17 @@ describe("/api/articles/:article_id", () => {
 			.expect(200)
 			.then((response) => {
 				const { article } = response.body;
-				expect(article.article_id).toBe(1);
-				expect(article.author).toBe("butter_bridge");
-				expect(article.title).toBe(
-					"Living in the shadow of a great man"
-				);
-				expect(article.body).toBe("I find this existence challenging");
-				expect(article.topic).toBe("mitch");
+				expect(article).toMatchObject({
+					article_id: 1,
+					author: "butter_bridge",
+					title: "Living in the shadow of a great man",
+					body: "I find this existence challenging",
+					topic: "mitch",
+					votes: 100,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
 				expect(new Date(article.created_at)).toBeInstanceOf(Date);
-				expect(article.votes).toBe(100);
-				expect(article.article_img_url).toBe(
-					"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-				);
 			});
 	});
 
@@ -159,6 +158,26 @@ describe("GET /api/articles/:article_id/comments", () => {
 			});
 	});
 
+	test("404: responds with appropriate error message when article doesn't exist", () => {
+		return request(app)
+			.get("/api/articles/999/comments")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe("Article not found");
+			});
+	});
+
+	test("400: responds with appropriate error message for invalid article_id", () => {
+		return request(app)
+			.get("/api/articles/not-an-id/comments")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe("Invalid id type");
+			});
+	});
+});
+
+describe("/api/topics", () => {
 	test("404: responds with appropriate error message when article doesn't exist", () => {
 		return request(app)
 			.get("/api/articles/999/comments")

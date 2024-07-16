@@ -3,7 +3,8 @@ const {
 	selectArticleById,
 	selectAllArticles,
 	selectCommentsByArticleId,
-} = require("../models/models");
+} = require("../models/get-models");
+const { checkArticleExists } = require("../db/seeds/utils");
 
 exports.getTopics = (req, res, next) => {
 	selectTopics()
@@ -42,7 +43,17 @@ exports.getCommentsByArticleId = (req, res, next) => {
 		.then((comments) => {
 			res.status(200).send({ comments });
 		})
+		.catch(next);
+};
+
+exports.postTeam = (req, res, next) => {
+	const newTeam = req.body;
+	insertTeam(newTeam)
+		.then((team) => {
+			res.status(201).send({ team });
+		})
 		.catch((err) => {
+			console.log(err, "<<<<postTeam Err in the cont");
 			next(err);
 		});
 };
