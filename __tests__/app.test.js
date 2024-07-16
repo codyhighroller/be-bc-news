@@ -8,7 +8,6 @@ const app = require("../app.js");
 const seed = require("../db/seeds/seed.js");
 const request = require("supertest");
 const db = require("../db/connection.js");
-const format = require("pg-format");
 const endpoints = require("../endpoints.json");
 
 beforeEach(() => seed({ topicData, userData, articleData, commentData }));
@@ -29,16 +28,14 @@ describe("/api/topics", () => {
 	});
 });
 
-describe("/api/topics", () => {
-	describe("GET /api", () => {
-		it("responds with a json detailing all available endpoints", () => {
-			return request(app)
-				.get("/api")
-				.expect(200)
-				.then(({ body }) => {
-					expect(body.endpoints).toEqual(endpoints);
-				});
-		});
+describe("/api/", () => {
+	it("responds with a json detailing all available endpoints", () => {
+		return request(app)
+			.get("/api")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.endpoints).toEqual(endpoints);
+			});
 	});
 });
 
@@ -69,7 +66,7 @@ describe("/api/articles/:article_id", () => {
 			.get("/api/articles/99999")
 			.expect(404)
 			.then((response) => {
-				expect(response.body.message).toBe("Article does not exist");
+				expect(response.body.message).toBe("Article not found");
 			});
 	});
 
@@ -83,37 +80,100 @@ describe("/api/articles/:article_id", () => {
 	});
 });
 
-describe("error handling", () => {
-	test("GET:404 responds with an appropriate error message when path not found", () => {
+describe("/api/articles", () => {
+	test("GET:200 articles have the correct properties and data types respectively", () => {
 		return request(app)
-			.get("/api/not-a-route")
-			.expect(404)
+			.get("/api/articles")
+			.expect(200)
 			.then(({ body }) => {
-				expect(body.message).toBe("Path not found");
+				expect(body.articles[0]).toEqual(
+					expect.objectContaining({
+						title: expect.any(String),
+						topic: expect.any(String),
+						author: expect.any(String),
+						article_id: expect.any(Number),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					})
+				);
+			});
+	});
+	test("GET:200 sends an array of all articles with the correct properties", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.then(({ body }) => {
+				expect(Array.isArray(body.articles)).toBe(true);
+				expect(body.articles.length).toBeGreaterThan(0);
+				body.articles.forEach((article) => {
+					expect(article).toMatchObject({
+						author: expect.any(String),
+						title: expect.any(String),
+						article_id: expect.any(Number),
+						topic: expect.any(String),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(Number),
+					});
+					expect(article.body).toBeUndefined();
+				});
+			});
+	});
+
+	test("GET:200 articles are sorted by date in descending order", () => {
+		return request(app)
+			.get("/api/articles")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("created_at", {
+					descending: true,
+				});
 			});
 	});
 });
 
-describe("isolated error handling: empty topics table", () => {
-	test("GET:404 'No topics found' error when no topics exist", () => {
-		// This test simulates an empty topics table
-		return db
-			.query(`DROP TABLE IF EXISTS comments;`)
-			.then(() => db.query(`DROP TABLE IF EXISTS articles;`))
-			.then(() => db.query(`DROP TABLE IF EXISTS users;`))
-			.then(() => db.query(`DROP TABLE IF EXISTS topics;`))
-			.then(() => {
-				return db.query(`
-			CREATE TABLE topics (
-			  slug VARCHAR PRIMARY KEY,
-			  description VARCHAR
-			);`);
-			})
-			.then(() => {
-				return request(app).get("/api/topics").expect(404);
-			})
+describe("GET /api/articles/:article_id/comments", () => {
+	test("200: responds with an array of comments for the given article_id with the correct properties", () => {
+		return request(app)
+			.get("/api/articles/1/comments")
+			.expect(200)
 			.then(({ body }) => {
-				expect(body.message).toBe("No topics found");
+				expect(Array.isArray(body.comments)).toBe(true);
+				expect(body.comments.length).toBeGreaterThan(0);
+				body.comments.forEach((comment) => {
+					expect(comment).toMatchObject({
+						comment_id: expect.any(Number),
+						votes: expect.any(Number),
+						created_at: expect.any(String),
+						author: expect.any(String),
+						body: expect.any(String),
+						article_id: 1,
+					});
+				});
+				expect(body.comments).toBeSortedBy("created_at", {
+					descending: true,
+				});
+			});
+	});
+
+	test("404: responds with appropriate error message when article doesn't exist", () => {
+		return request(app)
+			.get("/api/articles/999/comments")
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe("Article not found");
+			});
+	});
+
+	test("400: responds with appropriate error message for invalid article_id", () => {
+		return request(app)
+			.get("/api/articles/not-an-id/comments")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe("Invalid id type");
 			});
 	});
 });

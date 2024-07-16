@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
-const { getTopics, getArticleById } = require("./controllers/controller");
+const {
+	getTopics,
+	getArticleById,
+	getAllArticles,
+	getCommentsByArticleId,
+} = require("./controllers/controllers");
 const endpoints = require("./endpoints.json");
 const {
 	psqlErrorHandler,
@@ -10,13 +15,17 @@ const {
 
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
-
 app.get("/api", (request, response, next) => {
 	response.status(200).send({ endpoints: endpoints });
 });
 
+app.get("/api/topics", getTopics);
+
+app.get("/api/articles", getAllArticles);
+
 app.get("/api/articles/:article_id", getArticleById);
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.all("*", (req, res) => {
 	res.status(404).send({ message: "Path not found" });
