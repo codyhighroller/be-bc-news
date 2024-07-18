@@ -8,6 +8,7 @@ const {
 } = require("./controllers/get-controllers");
 const { postComment } = require("./controllers/post-controllers");
 const { patchArticle } = require("./controllers/patch-controllers");
+const { deleteComment } = require("./controllers/delete-controllers");
 const endpoints = require("./endpoints.json");
 const {
 	psqlErrorHandler,
@@ -32,6 +33,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchArticle);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.all("*", (req, res) => {
 	res.status(404).send({ message: "Path not found" });
