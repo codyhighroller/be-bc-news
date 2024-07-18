@@ -122,13 +122,88 @@ describe("GET /api/articles", () => {
 			});
 	});
 
-	test("GET:200 articles are sorted by date in descending order", () => {
+	test("GET:200 articles are sorted by date in descending order as default", () => {
 		return request(app)
 			.get("/api/articles")
 			.expect(200)
 			.then(({ body }) => {
 				expect(body.articles).toBeSortedBy("created_at", {
 					descending: true,
+				});
+			});
+	});
+});
+
+describe("GET /api/articles (with query parameters)", () => {
+	test("GET:200 articles are sorted by votes in ascending order when specified", () => {
+		return request(app)
+			.get("/api/articles?sort_by=votes&order=asc")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("votes", {
+					ascending: true,
+				});
+			});
+	});
+
+	test("GET:200 articles are sorted by comment_count in descending order when specified", () => {
+		return request(app)
+			.get("/api/articles?sort_by=comment_count&order=desc")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("comment_count", {
+					descending: true,
+				});
+			});
+	});
+
+	test("GET:200 articles are sorted by author alphabetically when specified", () => {
+		return request(app)
+			.get("/api/articles?sort_by=author&order=asc")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("author", {
+					ascending: true,
+				});
+			});
+	});
+
+	test("GET:400 responds with an error for an invalid sort_by query", () => {
+		return request(app)
+			.get("/api/articles?sort_by=invalid_column")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe("Invalid sort query");
+			});
+	});
+
+	test("GET:400 responds with an error for an invalid order query", () => {
+		return request(app)
+			.get("/api/articles?sort_by=votes&order=invalid_order")
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe("Invalid order query");
+			});
+	});
+
+	test("GET:200 articles are sorted by title in descending order when only sort_by is specified", () => {
+		return request(app)
+			.get("/api/articles?sort_by=title")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("title", {
+					descending: true,
+				});
+			});
+	});
+
+	test("GET:200 articles are sorted by created_at in ascending order when only order is specified", () => {
+		return request(app)
+			.get("/api/articles?order=asc")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.articles).toBeSortedBy("created_at", {
+					ascending: true,
 				});
 			});
 	});

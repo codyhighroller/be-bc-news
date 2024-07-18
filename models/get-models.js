@@ -20,21 +20,56 @@ exports.selectArticleById = (article_id) => {
 		});
 };
 
-exports.selectAllArticles = () => {
-	return db
-		.query(
-			`
-	  SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url,
-	  COUNT(comments.comment_id)::INT AS comment_count
-	  FROM articles
-	  LEFT JOIN comments ON articles.article_id = comments.article_id
-	  GROUP BY articles.article_id
-	  ORDER BY articles.created_at DESC;
-	`
-		)
-		.then(({ rows }) => {
-			return rows;
-		});
+exports.selectArticles = (sort_by = "created_at", order = "desc") => {
+	const whitelistSortBy = [
+		"article_id",
+		"title",
+		"topic",
+		"author",
+		"created_at",
+		"votes",
+		"comment_count",
+	];
+	const whitelistOrder = ["asc", "desc"];
+
+	let queryString = `
+    SELECT
+        articles.article_id,
+        articles.title,
+        articles.topic,
+        articles.author,
+        articles.created_at,
+        articles.votes,
+        articles.article_img_url,
+        COALESCE (comment_count, 0) :: INTEGER AS comment_count
+    FROM articles
+    LEFT JOIN (
+        SELECT
+            article_id,
+            COUNT (comment_id) AS comment_count
+        FROM comments
+        GROUP BY article_id
+    ) AS comment_counts
+    USING (article_id)
+    `;
+
+	if (whitelistSortBy.includes(sort_by.toLowerCase())) {
+		queryString += ` ORDER BY ${sort_by}`;
+	} else {
+		return Promise.reject({ status: 400, message: "Invalid sort query" });
+	}
+
+	if (whitelistOrder.includes(order.toLowerCase())) {
+		queryString += ` ${order.toUpperCase()}`;
+	} else {
+		return Promise.reject({ status: 400, message: "Invalid order query" });
+	}
+
+	return db.query(queryString).then(({ rows }) => {
+		return rows.map(
+			({ body, ...articleWithoutBody }) => articleWithoutBody
+		);
+	});
 };
 
 exports.selectCommentsByArticleId = (articleId) => {

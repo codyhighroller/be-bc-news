@@ -1,7 +1,8 @@
+const { query } = require("../db/connection");
 const {
 	selectTopics,
 	selectArticleById,
-	selectAllArticles,
+	selectArticles,
 	selectCommentsByArticleId,
 	selectUsers,
 } = require("../models/get-models");
@@ -27,8 +28,9 @@ exports.getArticleById = (req, res, next) => {
 		});
 };
 
-exports.getAllArticles = (req, res, next) => {
-	selectAllArticles()
+exports.getArticles = (req, res, next) => {
+	const { sort_by, order } = req.query;
+	selectArticles(sort_by, order)
 		.then((articles) => {
 			res.status(200).send({ articles });
 		})
