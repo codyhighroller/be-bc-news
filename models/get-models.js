@@ -48,3 +48,9 @@ exports.selectCommentsByArticleId = (articleId) => {
 		)
 		.then(({ rows }) => rows);
 };
+
+exports.selectUsers = () => {
+	return db.query("SELECT * FROM users;").then(({ rows }) => {
+		return rows;
+	});
+};
