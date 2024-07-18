@@ -4,7 +4,6 @@ const {
 	selectAllArticles,
 	selectCommentsByArticleId,
 } = require("../models/get-models");
-const { checkArticleExists } = require("../db/seeds/utils");
 
 exports.getTopics = (req, res, next) => {
 	selectTopics()
@@ -32,28 +31,15 @@ exports.getAllArticles = (req, res, next) => {
 		.then((articles) => {
 			res.status(200).send({ articles });
 		})
-		.catch((err) => {
-			next(err);
-		});
+		.catch(next);
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
 	const { article_id } = req.params;
-	selectCommentsByArticleId(article_id)
+	selectArticleById(article_id)
+		.then(() => selectCommentsByArticleId(article_id))
 		.then((comments) => {
 			res.status(200).send({ comments });
 		})
 		.catch(next);
-};
-
-exports.postTeam = (req, res, next) => {
-	const newTeam = req.body;
-	insertTeam(newTeam)
-		.then((team) => {
-			res.status(201).send({ team });
-		})
-		.catch((err) => {
-			console.log(err, "<<<<postTeam Err in the cont");
-			next(err);
-		});
 };

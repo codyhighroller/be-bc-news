@@ -9,9 +9,10 @@ const seed = require("../db/seeds/seed.js");
 const request = require("supertest");
 const db = require("../db/connection.js");
 
+beforeEach(() => seed({ topicData, userData, articleData, commentData }));
 afterAll(() => db.end());
 
-describe("error handling", () => {
+describe("GET error handling", () => {
 	test("GET:404 responds with an appropriate error message when path not found", () => {
 		return request(app)
 			.get("/api/not-a-route")

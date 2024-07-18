@@ -39,32 +39,12 @@ exports.selectAllArticles = () => {
 
 exports.selectCommentsByArticleId = (articleId) => {
 	return db
-		.query("SELECT * FROM articles WHERE article_id = $1", [articleId])
-		.then(({ rows }) => {
-			if (rows.length === 0) {
-				return Promise.reject({
-					status: 404,
-					message: "Article not found",
-				});
-			}
-			return db.query(
-				`SELECT comment_id, votes, created_at, author, body, article_id
-                FROM comments
-                WHERE article_id = $1
-                ORDER BY created_at DESC`,
-				[articleId]
-			);
-		})
-		.then(({ rows }) => rows);
-};
-
-exports.insertTeam = ({ team_name, formation_year }) => {
-	return db
 		.query(
-			"INSERT INTO teams (team_name, formation_year) VALUES ($1, $2) RETURNING *;",
-			[team_name, formation_year]
+			`SELECT comment_id, votes, created_at, author, body, article_id
+            FROM comments
+            WHERE article_id = $1
+            ORDER BY created_at DESC`,
+			[articleId]
 		)
-		.then((result) => {
-			return result.rows[0];
-		});
+		.then(({ rows }) => rows);
 };

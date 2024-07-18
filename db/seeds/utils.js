@@ -1,3 +1,5 @@
+const db = require("../connection.js");
+
 exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {
 	if (!created_at) return { ...otherProperties };
 	return { created_at: new Date(created_at), ...otherProperties };
@@ -20,15 +22,17 @@ exports.formatComments = (comments, idLookup) => {
 		};
 	});
 };
-exports.checkArticleExists = (articleId) => {
+
+exports.selectUserByUsername = (username) => {
 	return db
-		.query("SELECT 1 FROM articles WHERE article_id = $1", [articleId])
-		.then(({ rowCount }) => {
-			if (rowCount === 0) {
+		.query("SELECT * FROM users WHERE username = $1", [username])
+		.then(({ rows }) => {
+			if (rows.length === 0) {
 				return Promise.reject({
 					status: 404,
-					message: "Article not found",
+					message: "User not found",
 				});
 			}
+			return rows[0];
 		});
 };

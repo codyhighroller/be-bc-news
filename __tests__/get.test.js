@@ -13,7 +13,7 @@ const endpoints = require("../endpoints.json");
 beforeEach(() => seed({ topicData, userData, articleData, commentData }));
 afterAll(() => db.end());
 
-describe("/api/topics", () => {
+describe("GET /api/topics", () => {
 	test("GET:200 sends an array of topics to the client with slug and description keys", () => {
 		return request(app)
 			.get("/api/topics")
@@ -28,8 +28,8 @@ describe("/api/topics", () => {
 	});
 });
 
-describe("/api/", () => {
-	it("responds with a json detailing all available endpoints", () => {
+describe("GET /api/", () => {
+	it("GET:200 responds with a json detailing all available endpoints", () => {
 		return request(app)
 			.get("/api")
 			.expect(200)
@@ -74,12 +74,12 @@ describe("/api/articles/:article_id", () => {
 			.get("/api/articles/not-a-valid-id")
 			.expect(400)
 			.then((response) => {
-				expect(response.body.message).toBe("Invalid id type");
+				expect(response.body.message).toBe("Invalid input type");
 			});
 	});
 });
 
-describe("/api/articles", () => {
+describe("GET /api/articles", () => {
 	test("GET:200 articles have the correct properties and data types respectively", () => {
 		return request(app)
 			.get("/api/articles")
@@ -135,7 +135,7 @@ describe("/api/articles", () => {
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-	test("200: responds with an array of comments for the given article_id with the correct properties", () => {
+	test("GET 200: responds with an array of comments for the given article_id with the correct properties", () => {
 		return request(app)
 			.get("/api/articles/1/comments")
 			.expect(200)
@@ -158,7 +158,7 @@ describe("GET /api/articles/:article_id/comments", () => {
 			});
 	});
 
-	test("404: responds with appropriate error message when article doesn't exist", () => {
+	test("GET 404: responds with appropriate error message when article doesn't exist", () => {
 		return request(app)
 			.get("/api/articles/999/comments")
 			.expect(404)
@@ -167,32 +167,12 @@ describe("GET /api/articles/:article_id/comments", () => {
 			});
 	});
 
-	test("400: responds with appropriate error message for invalid article_id", () => {
+	test("GET 400: responds with appropriate error message for invalid article_id", () => {
 		return request(app)
 			.get("/api/articles/not-an-id/comments")
 			.expect(400)
 			.then(({ body }) => {
-				expect(body.message).toBe("Invalid id type");
-			});
-	});
-});
-
-describe("/api/topics", () => {
-	test("404: responds with appropriate error message when article doesn't exist", () => {
-		return request(app)
-			.get("/api/articles/999/comments")
-			.expect(404)
-			.then(({ body }) => {
-				expect(body.message).toBe("Article not found");
-			});
-	});
-
-	test("400: responds with appropriate error message for invalid article_id", () => {
-		return request(app)
-			.get("/api/articles/not-an-id/comments")
-			.expect(400)
-			.then(({ body }) => {
-				expect(body.message).toBe("Invalid id type");
+				expect(body.message).toBe("Invalid input type");
 			});
 	});
 });
