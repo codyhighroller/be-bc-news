@@ -3,7 +3,7 @@ const app = express();
 const {
 	getTopics,
 	getArticleById,
-	getAllArticles,
+	getArticles,
 	getCommentsByArticleId,
 	getUsers,
 } = require("./controllers/get-controllers");
@@ -27,7 +27,7 @@ app.get("/api/topics", getTopics);
 
 app.get("/api/users", getUsers);
 
-app.get("/api/articles", getAllArticles);
+app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id", getArticleById);
 
