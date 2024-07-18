@@ -1,3 +1,4 @@
 node_modules
 .env.*
 terminal-output.md
+ignoreUtils.js

@@ -13,7 +13,7 @@ beforeEach(() => seed({ topicData, userData, articleData, commentData }));
 afterAll(() => db.end());
 
 describe("POST /api/articles/:article_id/comments", () => {
-	test("201: adds a comment to an article and responds with the posted comment", () => {
+	test("POST 201: adds a comment to an article and responds with the posted comment", () => {
 		const newComment = {
 			username: "butter_bridge",
 			body: "This is a test comment",
@@ -34,7 +34,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 			});
 	});
 
-	test("404: responds with an error when the article does not exist", () => {
+	test("POST 404: responds with an error when the article does not exist", () => {
 		const newComment = {
 			username: "butter_bridge",
 			body: "This is a test comment",
@@ -44,11 +44,11 @@ describe("POST /api/articles/:article_id/comments", () => {
 			.send(newComment)
 			.expect(404)
 			.then(({ body }) => {
-				expect(body.message).toBe("Article not found");
+				expect(body.message).toBe("Input not found");
 			});
 	});
 
-	test("400: responds with an error for invalid article_id", () => {
+	test("POST 400: responds with an error for invalid article_id", () => {
 		const newComment = {
 			username: "butter_bridge",
 			body: "This is a test comment",
@@ -58,11 +58,11 @@ describe("POST /api/articles/:article_id/comments", () => {
 			.send(newComment)
 			.expect(400)
 			.then(({ body }) => {
-				expect(body.message).toBe("Invalid id type");
+				expect(body.message).toBe("Invalid input type");
 			});
 	});
 
-	test("400: responds with an error when required fields are missing", () => {
+	test("POST 400: responds with an error when required fields are missing", () => {
 		const invalidComment = {
 			username: "butter_bridge",
 		};
@@ -75,7 +75,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 			});
 	});
 
-	test("404: responds with an error when the username does not exist", () => {
+	test("POST 404: responds with an error when the username does not exist", () => {
 		const newComment = {
 			username: "non_existent_user",
 			body: "This is a test comment",
@@ -85,7 +85,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 			.send(newComment)
 			.expect(404)
 			.then(({ body }) => {
-				expect(body.message).toBe("User not found");
+				expect(body.message).toBe("Input not found");
 			});
 	});
 });
