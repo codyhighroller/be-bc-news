@@ -18,9 +18,9 @@ describe("GET /api/topics", () => {
 		return request(app)
 			.get("/api/topics")
 			.expect(200)
-			.then((response) => {
-				expect(response.body.topics.length).toBe(3);
-				response.body.topics.forEach((item) => {
+			.then(({ body }) => {
+				expect(body.topics.length).toBe(3);
+				body.topics.forEach((item) => {
 					expect(typeof item.slug).toBe("string");
 					expect(typeof item.description).toBe("string");
 				});
@@ -44,8 +44,8 @@ describe("/api/articles/:article_id", () => {
 		return request(app)
 			.get("/api/articles/1")
 			.expect(200)
-			.then((response) => {
-				const { article } = response.body;
+			.then(({ body }) => {
+				const { article } = body;
 				expect(article).toMatchObject({
 					article_id: 1,
 					author: "butter_bridge",
@@ -64,8 +64,8 @@ describe("/api/articles/:article_id", () => {
 		return request(app)
 			.get("/api/articles/99999")
 			.expect(404)
-			.then((response) => {
-				expect(response.body.message).toBe("Article not found");
+			.then(({ body }) => {
+				expect(body.message).toBe("Article not found");
 			});
 	});
 
@@ -73,8 +73,8 @@ describe("/api/articles/:article_id", () => {
 		return request(app)
 			.get("/api/articles/not-a-valid-id")
 			.expect(400)
-			.then((response) => {
-				expect(response.body.message).toBe("Invalid input type");
+			.then(({ body }) => {
+				expect(body.message).toBe("Invalid input type");
 			});
 	});
 });
@@ -173,6 +173,25 @@ describe("GET /api/articles/:article_id/comments", () => {
 			.expect(400)
 			.then(({ body }) => {
 				expect(body.message).toBe("Invalid input type");
+			});
+	});
+});
+
+describe("GET /api/users", () => {
+	test("GET:200 sends an array of objects to the client with correct keys", () => {
+		return request(app)
+			.get("/api/users")
+			.expect(200)
+			.then(({ body }) => {
+				expect(Array.isArray(body.users)).toBe(true);
+				expect(body.users.length).toBe(4);
+				body.users.forEach((user) => {
+					expect(user).toMatchObject({
+						username: expect.any(String),
+						name: expect.any(String),
+						avatar_url: expect.any(String),
+					});
+				});
 			});
 	});
 });
