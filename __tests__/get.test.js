@@ -77,6 +77,16 @@ describe("/api/articles/:article_id", () => {
 				expect(body.message).toBe("Invalid input type");
 			});
 	});
+
+	test("GET:200 returns article with comment_count", () => {
+		return request(app)
+			.get("/api/articles/1")
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.article).toHaveProperty("comment_count");
+				expect(typeof body.article.comment_count).toBe("number");
+			});
+	});
 });
 
 describe("GET /api/articles", () => {
