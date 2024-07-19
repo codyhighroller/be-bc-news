@@ -20,7 +20,7 @@ exports.selectArticleById = (article_id) => {
 		});
 };
 
-exports.selectArticles = (sort_by = "created_at", order = "desc") => {
+exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
 	const whitelistSortBy = [
 		"article_id",
 		"title",
@@ -53,6 +53,13 @@ exports.selectArticles = (sort_by = "created_at", order = "desc") => {
     USING (article_id)
     `;
 
+	const queryValues = [];
+
+	if (topic) {
+		queryString += ` WHERE topic = $1`;
+		queryValues.push(topic);
+	}
+
 	if (whitelistSortBy.includes(sort_by.toLowerCase())) {
 		queryString += ` ORDER BY ${sort_by}`;
 	} else {
@@ -64,8 +71,7 @@ exports.selectArticles = (sort_by = "created_at", order = "desc") => {
 	} else {
 		return Promise.reject({ status: 400, message: "Invalid order query" });
 	}
-
-	return db.query(queryString).then(({ rows }) => {
+	return db.query(queryString, queryValues).then(({ rows }) => {
 		return rows.map(
 			({ body, ...articleWithoutBody }) => articleWithoutBody
 		);
