@@ -209,6 +209,40 @@ describe("GET /api/articles (with query parameters)", () => {
 	});
 });
 
+describe("GET /api/articles (topic filtering)", () => {
+	test("GET:200 articles accept filtering by topic", () => {
+		return request(app)
+			.get("/api/articles?topic=mitch")
+			.expect(200)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBe(12);
+				articles.forEach((article) => {
+					expect(article).toHaveProperty("topic", "mitch");
+				});
+			});
+	});
+
+	test("GET:200 responds with empty array if topic does not exist", () => {
+		return request(app)
+			.get("/api/articles?topic=invalid")
+			.expect(200)
+			.then(({ body: { articles } }) => expect(articles).toEqual([]));
+	});
+
+	test("GET:200 articles can be filtered by topic and sorted", () => {
+		return request(app)
+			.get("/api/articles?topic=mitch&sort_by=votes&order=desc")
+			.expect(200)
+			.then(({ body: { articles } }) => {
+				expect(articles.length).toBeGreaterThan(0);
+				expect(articles).toBeSortedBy("votes", { descending: true });
+				articles.forEach((article) => {
+					expect(article).toHaveProperty("topic", "mitch");
+				});
+			});
+	});
+});
+
 describe("GET /api/articles/:article_id/comments", () => {
 	test("GET 200: responds with an array of comments for the given article_id with the correct properties", () => {
 		return request(app)
