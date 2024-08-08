@@ -43,7 +43,7 @@ exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
 		"comment_count",
 	];
 	const whitelistOrder = ["asc", "desc"];
-	const whitelistTopic = ["mitch", "cats", "paper"];
+	const whitelistTopic = ["football", "coding", "cooking"];
 
 	if (!whitelistSortBy.includes(sort_by.toLowerCase())) {
 		return Promise.reject({ status: 400, message: "Invalid sort query" });
